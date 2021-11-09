@@ -1,8 +1,8 @@
 config = {
     # AzurePortal->CosmosDB->キー->URI
-    'ENDPOINT': 'https://airvolumejudgedb.documents.azure.com:443/',
+    'ENDPOINT': 'https://airvolumejudgedbfree.documents.azure.com:443/',
     # AzurePortal->CosmosDB->キー->プライマリ キー
-    'PRIMARYKEY': 'Hk1O3cyjaQqKOIuVFJbuWdKR3Ovqr2saqjX87gZES7ZO7S9Wygf4LC6eXblZUPw36gFjntddEwdwcrGd27IYYw==',
+    'PRIMARYKEY': 'oY44Qrf5onQ09eRVl0EHYVu4FHcOQ809gafQX0SiIJTdpJ5ZNxWfUddfLb4hzaxHJHsrwiy1Pb2FmVxcPFZC0w==',
     'DATABASE': 'airvolumedb',  # Database名
     'CONTAINER': 'airvolumecontainer'  # コンテナ名
 }
