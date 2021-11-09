@@ -12,6 +12,7 @@ from azure.cosmos import exceptions, CosmosClient, PartitionKey
 def main(req: func.HttpRequest) -> func.HttpResponse:
     try:
         logging.info('Python HTTP trigger function processed a request.')
+        # DB初期設定
         endpoint = config["ENDPOINT"]
         key = config["PRIMARYKEY"]
 
@@ -27,32 +28,57 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             offer_throughput=400
         )
 
+        airvolumeReq = req.params.get('airvolume')
+        if not airvolumeReq:
+            try:
+                req_body = req.get_json()
+            except ValueError:
+                pass
+            else:
+                airvolumeReq = req_body.get('airvolume')
+
+        # レコードの最大値を取得
         maxId = "1"
         for id in container.query_items(
                 "SELECT VALUE MAX(c.id) FROM c", enable_cross_partition_query=True):
             maxId = str(id)
 
-        item = container.read_item(item=maxId, partition_key=maxId)
+        if airvolumeReq:
+            # クエリがある場合、新規で追加
+            newId = int(maxId) + 1
 
-        request_charge = container.client_connection.last_response_headers['x-ms-request-charge']
+            container.create_item(
+                body={"id": str(newId), "pk": str(newId), "airvolume": airvolumeReq})
+            return func.HttpResponse(
+                body=json.dumps({"messeage": "success"}),
+                mimetype="application/json",
+                charset="utf-8",
+                status_code=200
+            )
+        else:
+            # クエリがない場合、最新のレコードを取得
+            item = container.read_item(item=maxId, partition_key=maxId)
 
-        print('Read item with airvolume {0}. Operation consumed {1} request units'.format(
-            item['airvolume'], (request_charge)))
+            request_charge = container.client_connection.last_response_headers[
+                'x-ms-request-charge']
 
-        datetime1 = datetime.now().isoformat()
-        airVolume = item['airvolume']
+            print('Read item with airvolume {0}. Operation consumed {1} request units'.format(
+                item['airvolume'], (request_charge)))
 
-        res = {
-            "dateTime": datetime1,
-            "airVolume": airVolume  # weak,normal,strong
-        }
+            datetime1 = datetime.now().isoformat()
+            airVolume = item['airvolume']
 
-        return func.HttpResponse(
-            body=json.dumps(res),
-            mimetype="application/json",
-            charset="utf-8",
-            status_code=200
-        )
+            res = {
+                "dateTime": datetime1,
+                "airVolume": airVolume  # weak,normal,strong
+            }
+
+            return func.HttpResponse(
+                body=json.dumps(res),
+                mimetype="application/json",
+                charset="utf-8",
+                status_code=200
+            )
 
     except Exception as e:
         logging.info("エラー発生")
