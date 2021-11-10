@@ -12,6 +12,7 @@ from azure.cosmos import exceptions, CosmosClient, PartitionKey
 def main(req: func.HttpRequest) -> func.HttpResponse:
     try:
         logging.info('Python HTTP trigger function processed a request.')
+        # CD動作確認
         # DB初期設定
         endpoint = config["ENDPOINT"]
         key = config["PRIMARYKEY"]
